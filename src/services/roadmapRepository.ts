@@ -1,4 +1,4 @@
-import type { GeneratedRoadmapTask, RoadmapInput } from '../features/roadmaps/generator';
+import { inferRoadmapStrategy, type GeneratedRoadmapTask, type RoadmapInput, type RoadmapStrategy } from '../features/roadmaps/generator';
 import { supabase } from './supabase';
 
 export type RoadmapTask = GeneratedRoadmapTask & { id: string; status: 'upcoming' | 'in_progress' | 'completed' };
@@ -6,6 +6,7 @@ export type RoadmapSummary = RoadmapInput & {
   id: string;
   careerId: string | null;
   status: 'active' | 'paused' | 'archived';
+  strategy?: RoadmapStrategy;
   updatedAt: string;
   tasks: RoadmapTask[];
 };
@@ -26,16 +27,17 @@ export async function listRoadmaps(userId: string): Promise<RoadmapSummary[]> {
   if (error) throw roadmapLoadError(error.message);
   return (data || []).map((row: any) => {
     const nodeKeys = new Map((row.roadmap_nodes || []).map((task: any) => [task.id, task.client_key]));
-    return ({
-    id: row.id, careerId: row.career_id, title: row.title, goalDescription: row.goal_description,
-    startingLevel: row.starting_level, weeklyTime: row.weekly_time, targetDate: row.target_date || '',
-    preferredFormat: row.preferred_format, status: row.status, updatedAt: row.updated_at,
-    tasks: (row.roadmap_nodes || []).sort((a: any, b: any) => a.position - b.position).map((task: any) => ({
+    const tasks: RoadmapTask[] = (row.roadmap_nodes || []).sort((a: any, b: any) => a.position - b.position).map((task: any) => ({
       id: task.id, client_key: task.client_key, title: task.title, description: task.description,
       effort_note: task.effort_note, position: task.position, task_type: task.task_type,
       resource_url: task.resource_url || '', completion_criteria: task.completion_criteria,
       estimated_time: task.estimated_time, skill_id: task.skill_id || '', depends_on: (task.roadmap_edges || []).map((edge: any) => nodeKeys.get(edge.from_node_id)).filter(Boolean), status: task.status || 'upcoming',
-    })),
+    }));
+    return ({
+    id: row.id, careerId: row.career_id, title: row.title, goalDescription: row.goal_description,
+    startingLevel: row.starting_level, weeklyTime: row.weekly_time, targetDate: row.target_date || '',
+    preferredFormat: row.preferred_format, status: row.status, updatedAt: row.updated_at,
+    strategy: inferRoadmapStrategy(tasks), tasks,
   });
   });
 }

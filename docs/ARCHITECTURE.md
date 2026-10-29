@@ -4,7 +4,9 @@
 - Vite + React + TypeScript single-page app, with React Router routes in `src/App.tsx`.
 - Typed product state is shared by routed screens and persisted to `localStorage` under `aayam-demo` when no Supabase client is configured.
 - `src/features/assessment/riasec.ts` owns the activity question bank, response scale, dimension descriptions, balanced attempt selection, and deterministic scoring. `src/services/aayamRepository.ts` handles profile, assessment, saved-career, legacy-roadmap, and portfolio persistence.
-- `src/services/careerRepository.ts` loads published career and skill catalogs. `src/features/careers/matching.ts` provides deterministic explainable matching with missing factors omitted and available weights renormalized. `src/features/roadmaps/generator.ts` provides catalog-informed roadmap templates.
+- `src/services/careerRepository.ts` loads published career and skill catalogs. `src/features/careers/matching.ts` provides deterministic explainable matching with missing factors omitted and available weights renormalized. `src/features/roadmaps/generator.ts` provides comparable Fast Track, Balanced, and Project-Based plans. The selected task sequence is persisted through the existing roadmap RPC; strategy labels are inferred from stable task keys, so no schema change is required.
+- `src/features/landing/SculptureCanvas.tsx` builds an original triangulated rod-and-joint truss from procedural WebGL geometry. It uses no external model or AI service; pointer, drag, keyboard, reduced-motion, visibility, and fallback handling are part of the component.
+- `src/features/career-universe/CareerPathExplorer.tsx` joins published career requirements with saved roadmap tasks and prerequisite edges for the interactive career path workspace. Skill evidence remains explicitly unknown in this view because that repository is not loaded there.
 - `src/services/roadmapRepository.ts` and `src/services/skillEvidenceRepository.ts` handle user-scoped roadmap and skill-evidence operations. No LLM provider is configured or called.
 
 ## Data and security boundaries

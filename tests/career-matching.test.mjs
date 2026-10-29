@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { matchCareer, rankCareers } from '../src/features/careers/matching.ts';
 import { scoreAssessment, questions, selectBalancedQuestionIds } from '../src/features/assessment/riasec.ts';
-import { generateCareerRoadmap } from '../src/features/roadmaps/generator.ts';
+import { generateCareerRoadmap, inferRoadmapStrategy } from '../src/features/roadmaps/generator.ts';
 
 const career = {
   id: 'data', name: 'Data analyst', riasecDimensions: ['I', 'C'],
@@ -56,4 +56,36 @@ test('career roadmap generation uses catalog skills and prerequisite order', () 
   assert.deepEqual(generated[1].depends_on, ['orientation']);
   assert.deepEqual(generated[2].depends_on, ['skill-analysis']);
   assert.deepEqual(generated.at(-1).depends_on, ['skill-statistics']);
+});
+
+test('career roadmap strategies produce distinct sequences and preserve valid prerequisites', () => {
+  const input = { title: 'Explore data', goalDescription: '', startingLevel: 'beginner', weeklyTime: '3 hours', preferredFormat: '' };
+  const fast = generateCareerRoadmap(career, input, 'fast_track');
+  const balanced = generateCareerRoadmap(career, input, 'balanced');
+  const projectBased = generateCareerRoadmap(career, input, 'project_based');
+  assert.notDeepEqual(fast.map(task => task.client_key), balanced.map(task => task.client_key));
+  assert.notDeepEqual(projectBased.map(task => task.client_key), balanced.map(task => task.client_key));
+  assert.equal(projectBased[1].task_type, 'project');
+  assert.equal(projectBased[1].skill_id, 'analysis');
+  for (const tasks of [fast, balanced, projectBased]) {
+    const position = new Map(tasks.map((task, index) => [task.client_key, index]));
+    assert.ok(tasks.every(task => task.depends_on.every(dependency => position.get(dependency) < position.get(task.client_key))));
+  }
+});
+
+test('basic roadmap strategies remain meaningfully different without catalog data', () => {
+  const input = { title: 'Learn illustration', goalDescription: '', startingLevel: 'beginner', weeklyTime: '', preferredFormat: '' };
+  const fast = generateCareerRoadmap(undefined, input, 'fast_track');
+  const balanced = generateCareerRoadmap(undefined, input, 'balanced');
+  const projectBased = generateCareerRoadmap(undefined, input, 'project_based');
+  assert.equal(fast.length, 3);
+  assert.equal(balanced.length, 5);
+  assert.equal(projectBased[0].task_type, 'project');
+  assert.notDeepEqual(fast.map(task => task.title), projectBased.map(task => task.title));
+});
+
+test('saved roadmap strategy is restored from its stable task keys', () => {
+  assert.equal(inferRoadmapStrategy([{ client_key: 'sprint-brief' }]), 'fast_track');
+  assert.equal(inferRoadmapStrategy([{ client_key: 'early-project' }]), 'project_based');
+  assert.equal(inferRoadmapStrategy([{ client_key: 'orientation' }]), 'balanced');
 });
