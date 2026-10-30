@@ -172,7 +172,7 @@
 .universe-stage-panel { padding: 16px; background: #f2f0e9; }
 .universe-stage { min-height: 520px; background: radial-gradient(ellipse at 46% 48%, #fffdf8 0, #f4f1e8 69%, #eeece3 100%); cursor: grab; }
 .universe-stage:active { cursor: grabbing; }
-.universe-graph { inset: 9% 3% 19%; }
+.universe-graph { inset: 8% 3% 14%; }
 .universe-edges line { stroke: #b5b8ab; stroke-width: .48; opacity: .85; }
 .universe-edges line.path-edge { stroke: #738b77; stroke-dasharray: 1.4 1; }
 .universe-edges line.active { stroke: #315e49; stroke-width: 1.15; }
@@ -180,7 +180,7 @@
 .universe-joint { width: 58px; height: 58px; color: #365d49; box-shadow: inset -3px -4px 7px rgba(67,62,50,.12), 0 5px 12px rgba(54,52,45,.11); }
 .universe-node.career .universe-joint { width: 78px; height: 78px; }
 .universe-node.task .universe-joint,.universe-node.project .universe-joint { width: 52px; height: 52px; }
-.universe-node-label { max-width: 158px; padding: 5px 8px; border: 1px solid rgba(219,219,209,.9); border-radius: 6px; background: rgba(255,255,252,.96); color: #24364b; font-size: 11px; line-height: 1.25; overflow-wrap: anywhere; }
+.universe-node-label { max-width: min(158px, 28vw); padding: 5px 8px; border: 1px solid rgba(219,219,209,.96); border-radius: 6px; background: #fffefa; color: #24364b; font-size: 11px; line-height: 1.3; overflow-wrap: anywhere; white-space: normal; }
 .universe-node.selected .universe-node-label { border-color: #63866d; background: #eff4ed; }
 .universe-node.evidenced .universe-joint,.universe-legend i.evidenced { border-color: #64866c; background: #dce9dc; }
 .universe-node.blocked .universe-joint,.universe-legend i.blocked { border-color: #b49a6a; background: #eee5d2; }
@@ -232,14 +232,84 @@
 @media (max-width: 560px) {
   .universe-stage-panel { padding: 9px; }
   .universe-stage { min-height: 430px; }
-  .universe-graph { inset: 12% 1% 23%; }
+  .universe-graph { inset: 10% 1% 15%; }
   .universe-joint { width: 42px; height: 42px; }
   .universe-node.career .universe-joint { width: 58px; height: 58px; }
   .universe-node.task .universe-joint,.universe-node.project .universe-joint { width: 40px; height: 40px; }
-  .universe-node-label { max-width: 95px; padding: 4px 5px; font-size: 9px; }
+  .universe-node-label { max-width: min(158px, 44vw); padding: 4px 6px; font-size: 9px; }
   .universe-column-labels { font-size: 7px; letter-spacing: .08em; }
   .universe-legend { gap: 6px 9px; font-size: 8px; }
   .universe-hint { display: none; }
 }
-.universe-node-label { width: min(150px, 30vw); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-@media (max-width: 560px) { .universe-node-label { width: min(96px, 25vw); font-size: 8px; } }
+/* Keep long career and skill names readable instead of clipping them into one line. */
+.universe-node-label { width: auto; overflow: visible; text-overflow: clip; }
+
+/* Refined landing-page rhythm and hierarchy. */
+.landing .site-nav { height: 74px; gap: 22px; }
+.landing .desktop-nav { gap: clamp(18px, 2.4vw, 36px); color: #344256; }
+.landing .hero { grid-template-columns: minmax(0,.92fr) minmax(0,1.08fr); gap: clamp(24px,4vw,58px); align-items: center; padding-top: 20px; }
+.landing .hero-copy { max-width: 600px; padding-left: 0; }
+.landing .hero h1 { max-width: 600px; font-size: clamp(42px,4.7vw,66px); line-height: 1.02; letter-spacing: -.052em; }
+.landing .lead { max-width: 510px; font-size: 15px; line-height: 1.68; }
+.landing .hero-actions { gap: 22px; margin: 23px 0 25px; }
+.landing .value-row { gap: 14px; }
+.landing .value { max-width: 160px; font-size: 11px; }
+.landing .nav-actions { gap: 16px; }
+.landing .nav-actions .button { border-radius: 8px; }
+@media (max-width: 820px) {
+  .landing .hero { grid-template-columns: 1fr; gap: 12px; padding-top: 26px; }
+  .landing .hero-copy { max-width: 680px; }
+  .landing .hero h1 { max-width: 680px; font-size: clamp(44px,8vw,62px); }
+}
+@media (max-width: 560px) {
+  .landing .site-nav { height: 66px; }
+  .landing .hero { gap: 8px; padding-top: 22px; }
+  .landing .hero h1 { font-size: clamp(40px,11.5vw,52px); line-height: 1.03; }
+  .landing .lead { font-size: 14px; }
+  .landing .hero-actions { flex-wrap: wrap; gap: 13px 20px; margin: 19px 0 21px; }
+  .landing .value-row { gap: 9px; }
+  .landing .value { max-width: 33%; align-items: flex-start; gap: 7px; font-size: 10px; }
+  .landing .icon-bubble { width: 32px; height: 32px; }
+}
+/* Aayam 3D Career Map — visibility fix */
+.universe-stage {
+  position: relative;
+  min-height: 680px;
+  overflow: hidden;
+  perspective: 1400px;
+  perspective-origin: 50% 45%;
+}
+
+.universe-graph {
+  position: absolute;
+  inset: 5% 3% 10%;
+  transform-origin: center center;
+  transform-style: preserve-3d;
+}
+
+.universe-edges {
+  overflow: visible;
+  pointer-events: none;
+}
+
+.universe-node {
+  max-width: 150px;
+}
+
+.universe-node-label {
+  max-width: 140px;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+}
+
+@media (max-width: 760px) {
+  .universe-stage {
+    min-height: 560px;
+  }
+
+  .universe-node-label {
+    max-width: 100px;
+    font-size: 9px;
+  }
+}

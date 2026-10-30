@@ -132,12 +132,28 @@ export async function setSavedCareer(userId:string,careerId:string,saved:boolean
   fail(response.error);
 }
 
+export async function saveProfile(userId: string, profile: NonNullable<WorkspaceState['profile']>): Promise<void> {
+  if (!supabase) return;
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  if (authError || user?.id !== userId) throw new Error('Your authenticated account changed. Refresh and try again.');
+  const { error } = await supabase.from('profiles').upsert({
+    id: userId,
+    display_name: profile.name.trim() || null,
+    educational_stage: stages[profile.stage] || 'school',
+    study_context: { summary: profile.study.trim() },
+    interests: profile.interests,
+    goals: profile.goal.trim() ? [profile.goal.trim()] : [],
+    learning_preferences: { weekly_time: profile.time },
+  }, { onConflict: 'id' });
+  fail(error);
+}
+
 export async function saveWorkspace(userId: string, state: WorkspaceState): Promise<void> {
   if (!supabase) return;
-  if (!state.profile) { const {error}=await supabase.from('profiles').delete().eq('id',userId); fail(error); }
   if (state.profile) {
     const p=state.profile;
-    const {error}=await supabase.from('profiles').upsert({id:userId,display_name:p.name||null,educational_stage:stages[p.stage]||'school',study_context:{summary:p.study},interests:p.interests,goals:p.goal?[p.goal]:[],learning_preferences:{weekly_time:p.time}},{onConflict:'id'}); fail(error);
+    const {error}=await supabase.from('profiles').upsert({id:userId,display_name:p.name.trim()||null,educational_stage:stages[p.stage]||'school',study_context:{summary:p.study.trim()},interests:p.interests,goals:p.goal.trim()?[p.goal.trim()]:[],learning_preferences:{weekly_time:p.time}},{onConflict:'id'});
+    fail(error);
   }
   const nodes=state.roadmapNodes;
   if (state.career || nodes.length || state.done.length) {

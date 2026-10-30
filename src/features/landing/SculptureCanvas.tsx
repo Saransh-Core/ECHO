@@ -343,7 +343,7 @@ export function SculptureCanvas({ careerName, careerDescription, skills, sourceL
   }, [reducedMotion]);
 
   const selectedSkill = selected >= 0 ? previewSkills[selected] : null;
-  return <div className={`sculpture-stage ${status === 'ready' ? 'is-ready' : ''}`}>
+  return <div className="sculpture-preview-layout"><div className={`sculpture-stage ${status === 'ready' ? 'is-ready' : ''}`}>
     <div className="sculpture-light" aria-hidden="true" />
     <div className="sculpture-shadow" aria-hidden="true" />
     <canvas ref={canvasRef} className="sculpture-canvas" aria-label="Interactive three-dimensional career map. Drag to rotate or use the arrow keys." role="application" tabIndex={0} />
@@ -352,9 +352,8 @@ export function SculptureCanvas({ careerName, careerDescription, skills, sourceL
     <div className="preview-nodes" aria-label="Explore this career preview">
       <button className={`preview-node career-node ${selected === -1 ? 'active' : ''}`} onClick={() => setSelected(-1)} aria-pressed={selected === -1}><BriefcaseBusiness size={16}/><span>{careerName}</span></button>
       {previewSkills.map((skill, index) => { const Icon = skillIcons[index % skillIcons.length]; return <button key={skill.id} className={`preview-node skill-node skill-node-${index + 1} ${selected === index ? 'active' : ''}`} onClick={() => setSelected(index)} aria-pressed={selected === index}><Icon size={14}/><span>{skill.name}</span></button>; })}
-      <div className="preview-insight" aria-live="polite"><span className="preview-source">{sourceLabel}</span><b>{selectedSkill?.name || careerName}</b><p>{selectedSkill?.description || careerDescription}</p><Link to="/career-universe">Explore the full career map <ArrowRight size={13}/></Link></div>
     </div>
     <div className="sculpture-caption" aria-hidden="true"><span>CAREER</span><i /><span>REQUIRED SKILLS</span></div>
     {!reducedMotion && <span className="sculpture-hint" aria-hidden="true">DRAG TO EXPLORE</span>}
-  </div>;
+  </div><aside className="preview-insight" aria-live="polite"><span className="preview-source">{sourceLabel}</span><b>{selectedSkill?.name || careerName}</b><p>{selectedSkill?.description || careerDescription}</p><Link to="/career-universe">Explore the full career map <ArrowRight size={13}/></Link></aside></div>;
 }
